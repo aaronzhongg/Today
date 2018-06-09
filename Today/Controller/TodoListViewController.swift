@@ -10,11 +10,14 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
 
-    var itemArray = ["Bananas", "Apples", "Pineapple"]
+    var itemArray = [TodoItem]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        itemArray.append(TodoItem(newItemTitle: "Pick up Stephanie @ 1.30pm"))
+        
     }
 
     // MARK - Tableview Datasource Methods
@@ -26,7 +29,11 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "todoItemCell", for: indexPath)
-        cell.textLabel!.text = itemArray[indexPath.row]
+        let cellItem = itemArray[indexPath.row]
+        
+        cell.textLabel!.text = cellItem.title
+        
+        cell.accessoryType = cellItem.completed ? .checkmark : .none
         
         return cell
     }
@@ -35,11 +42,9 @@ class TodoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        } else {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
+        itemArray[indexPath.row].completed = !itemArray[indexPath.row].completed
+        
+        tableView.reloadData()
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
@@ -52,7 +57,7 @@ class TodoListViewController: UITableViewController {
         let alertAction = UIAlertAction(title: "Add Item", style: .default) { (alertAction) in
             
             if newTodoTextField.text != nil {
-                self.itemArray.append(newTodoTextField.text!)
+                self.itemArray.append(TodoItem(newItemTitle: newTodoTextField.text!))
                 
                 self.tableView.reloadData()
             }
