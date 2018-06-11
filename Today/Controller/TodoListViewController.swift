@@ -81,7 +81,7 @@ class TodoListViewController: UITableViewController {
                         try self.realm.write {
                             let newTodoItem = TodoItem()
                             newTodoItem.title = newTodoTextField.text!
-                            newTodoItem.completed = false
+                            newTodoItem.dateCreated = Date()
                             currentCategory.todoItems.append(newTodoItem)
                         }
                     } catch {
@@ -123,32 +123,22 @@ class TodoListViewController: UITableViewController {
 
 // MARK: - Search Bar
 
-//extension TodoListViewController: UISearchBarDelegate {
-////    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-////
-////    }
-//
-//    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-//        if searchText.count > 2 {
-//            let request: NSFetchRequest<TodoItem> = TodoItem.fetchRequest()
-//
-//            let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchText)
-//
-//            request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-//
-//            loadItems(with: request, predicate: predicate)
-//
-//        } else {
-//            loadItems()
-//        }
-//
-//        tableView.reloadData()
-//    }
-//
-//    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-//        DispatchQueue.main.async {
-//            searchBar.resignFirstResponder()
-//        }
-//    }
-//}
+extension TodoListViewController: UISearchBarDelegate {
+
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.count > 2 {
+            todoItems = todoItems?.filter("title CONTAINS[cd] %@", searchText).sorted(byKeyPath: "dateCreated", ascending: true)
+        } else {
+            loadItems()
+        }
+
+        tableView.reloadData()
+    }
+
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        DispatchQueue.main.async {
+            searchBar.resignFirstResponder()
+        }
+    }
+}
 
