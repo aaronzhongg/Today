@@ -1,12 +1,11 @@
 # Today
 
 A simple iOS todo list app
-- Delete and add categories
-- Todo items separated into categories
-- Add and delete todo items
-- Search todo items
-- Random colour generated for each category
 
+- Add and delete categories
+- Add, check off, delete and search todo items
+- Random colour generated for each category
+- Gradient colour in todo lists
 
 ![Today app demo](https://media.giphy.com/media/8K246rbMKLvjC2593J/giphy.gif)
 
