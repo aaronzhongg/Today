@@ -8,17 +8,22 @@
 
 import UIKit
 import CoreData
+import RealmSwift
+import ChameleonFramework
 
-class CategoryViewController: UITableViewController {
+class CategoryViewController: SwipeTableViewController {
     
-    var categoryArray = [Category]()
+    let realm = try! Realm()
     
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    var categories: Results<Category>?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+        print(Realm.Configuration.defaultConfiguration.fileURL!)
+        
+        tableView.rowHeight = 80
+        tableView.separatorStyle = .none
         
         loadData()
     }
@@ -32,21 +37,22 @@ class CategoryViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return categoryArray.count
+        return categories?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
-        cell.textLabel?.text = categoryArray[indexPath.row].name
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
+        cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories Added Yet"
+        cell.textLabel?.font = cell.textLabel?.font.withSize(20)
         
+        cell.backgroundColor = UIColor.init(hexString: categories?[indexPath.row].backgroundColour ?? "")
+        cell.textLabel?.textColor = ContrastColorOf(cell.backgroundColor!, returnFlat: true)
         return cell
     }
     
     // MARK: - Table view delegate
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        tableView.deselectRow(at: indexPath, animated: true)
-        
         performSegue(withIdentifier: "goToItems", sender: self)
     }
     
@@ -54,15 +60,19 @@ class CategoryViewController: UITableViewController {
         let destinationVC = segue.destination as! TodoListViewController
         
         if let indexPath = tableView.indexPathForSelectedRow {
-            destinationVC.selectedCategory = categoryArray[indexPath.row]
+            destinationVC.selectedCategory = categories?[indexPath.row]
         }
     }
     
+    
+    
     // MARK: - Data Manipulation
     
-    func saveData() {
+    func saveData(category: Category) {
         do {
-            try context.save()
+            try realm.write {
+                realm.add(category)
+            }
         } catch {
             print("Error saving context: \(error)")
         }
@@ -71,11 +81,20 @@ class CategoryViewController: UITableViewController {
     }
     
     func loadData() {
-        do {
-            let request: NSFetchRequest<Category> = Category.fetchRequest()
-            categoryArray = try context.fetch(request)
-        } catch {
-            print("Error fetching request: \(error)")
+        categories = realm.objects(Category.self)
+        
+        tableView.reloadData()
+    }
+    
+    override func deleteItem(at indexPath: IndexPath) {
+        if let categoryToDelete = self.categories?[indexPath.row] {
+            do {
+                try self.realm.write {
+                    self.realm.delete(categoryToDelete)
+                }
+            } catch {
+                print("Error deleting category: \(error)")
+            }
         }
     }
     
@@ -86,21 +105,21 @@ class CategoryViewController: UITableViewController {
         addCategoryAlert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Category name"
             newCategoryTextField = alertTextField
+            alertTextField.autocapitalizationType = UITextAutocapitalizationType.words
         }
         
         addCategoryAlert.addAction(UIAlertAction(title: "Add", style: .default, handler: { (alertAction) in
             // Add new category
-            let newCategory = Category(context: self.context)
+            let newCategory = Category()
             newCategory.name = newCategoryTextField.text!
-            self.categoryArray.append(newCategory)
             
-            self.saveData()
+            newCategory.backgroundColour = UIColor.randomFlat.hexValue()
+            self.saveData(category: newCategory)
         }))
         
         addCategoryAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         
         present(addCategoryAlert, animated: true)
     }
-    
     
 }
