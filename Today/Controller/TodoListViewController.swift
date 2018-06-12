@@ -8,8 +8,9 @@
 
 import UIKit
 import RealmSwift
+import SwipeCellKit
 
-class TodoListViewController: UITableViewController {
+class TodoListViewController: SwipeTableViewController {
 
     var todoItems: Results<TodoItem>?
     let realm = try! Realm()
@@ -36,7 +37,7 @@ class TodoListViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "todoItemCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         if let cellItem = todoItems?[indexPath.row] {
             cell.textLabel!.text = cellItem.title
             
@@ -106,18 +107,36 @@ class TodoListViewController: UITableViewController {
     
     // MARK: - Model Manipulation
     
-//    func saveItems() {
-//
-//        do {
-//            try context.save()
-//        } catch {
-//            print(error)
-//        }
-//    }
-    
     func loadItems() {
         todoItems = selectedCategory?.todoItems.sorted(byKeyPath: "title", ascending: true)
         tableView.reloadData()
+    }
+    
+    override func deleteItem(at indexPath: IndexPath) {
+        if let todoItem = todoItems?[indexPath.row] {
+            do {
+                try realm.write {
+                    realm.delete(todoItem)
+                }
+            } catch {
+                print("Error deleting item: \(error)")
+            }
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
+        guard orientation == .right else { return nil }
+        
+        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, indexPath in
+            // handle action by updating model with deletion
+            print("Delete cell")
+            self.deleteItem(at: indexPath)
+        }
+        
+        // customize the action appearance
+        //        deleteAction.image = UIImage(named: "delete-icon")
+        
+        return [deleteAction]
     }
 }
 
