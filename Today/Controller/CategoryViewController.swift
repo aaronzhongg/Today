@@ -9,6 +9,7 @@
 import UIKit
 import CoreData
 import RealmSwift
+import ChameleonFramework
 
 class CategoryViewController: SwipeTableViewController {
     
@@ -22,6 +23,8 @@ class CategoryViewController: SwipeTableViewController {
         print(Realm.Configuration.defaultConfiguration.fileURL!)
         
         tableView.rowHeight = 80
+        tableView.separatorStyle = .none
+        
         loadData()
     }
 
@@ -40,7 +43,10 @@ class CategoryViewController: SwipeTableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories Added Yet"
+        cell.textLabel?.font = cell.textLabel?.font.withSize(20)
         
+        cell.backgroundColor = UIColor.init(hexString: categories?[indexPath.row].backgroundColour ?? "")
+        cell.textLabel?.textColor = ContrastColorOf(cell.backgroundColor!, returnFlat: true)
         return cell
     }
     
@@ -99,6 +105,7 @@ class CategoryViewController: SwipeTableViewController {
         addCategoryAlert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Category name"
             newCategoryTextField = alertTextField
+            alertTextField.autocapitalizationType = UITextAutocapitalizationType.words
         }
         
         addCategoryAlert.addAction(UIAlertAction(title: "Add", style: .default, handler: { (alertAction) in
@@ -106,6 +113,7 @@ class CategoryViewController: SwipeTableViewController {
             let newCategory = Category()
             newCategory.name = newCategoryTextField.text!
             
+            newCategory.backgroundColour = UIColor.randomFlat.hexValue()
             self.saveData(category: newCategory)
         }))
         

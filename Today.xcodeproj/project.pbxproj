@@ -77,8 +77,8 @@
 		938D4E1320CB4AEC007B44AF /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				93E3935020CA3EA50036AC90 /* TodoListViewController.swift */,
 				93B0B43020CE05C4004204D7 /* CategoryViewController.swift */,
+				93E3935020CA3EA50036AC90 /* TodoListViewController.swift */,
 				9396739520CFB3B600BE916F /* SwipeTableViewController.swift */,
 			);
 			path = Controller;
@@ -208,12 +208,14 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Today/Pods-Today-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/ChameleonFramework/ChameleonFramework.framework",
 				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
 				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/SwipeCellKit/SwipeCellKit.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ChameleonFramework.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwipeCellKit.framework",

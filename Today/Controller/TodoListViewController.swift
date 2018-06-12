@@ -9,11 +9,14 @@
 import UIKit
 import RealmSwift
 import SwipeCellKit
+import ChameleonFramework
 
 class TodoListViewController: SwipeTableViewController {
 
     var todoItems: Results<TodoItem>?
     let realm = try! Realm()
+    
+    @IBOutlet weak var todoSearchBar: UISearchBar!
     
     var selectedCategory: Category? {
         didSet{
@@ -24,9 +27,26 @@ class TodoListViewController: SwipeTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
-        
+        tableView.separatorStyle = .none
+        tableView.rowHeight = 50
+      
         loadItems()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        guard let colourHex = selectedCategory?.backgroundColour else { fatalError() }
+        guard let navBarColour = UIColor(hexString: colourHex) else { fatalError() }
+        guard let navBar = navigationController?.navigationBar else {fatalError("Navigation Controller does not exist ")}
+        
+        title = selectedCategory?.name
+    
+        todoSearchBar.barTintColor = navBarColour
+        navBar.barTintColor = navBarColour
+        navBar.tintColor = ContrastColorOf(navBarColour, returnFlat: true)
+        navBar.largeTitleTextAttributes = [NSAttributedStringKey.foregroundColor: ContrastColorOf(navBarColour, returnFlat: true)]
+        
+        
+        
     }
 
     // MARK: - Tableview Datasource Methods
@@ -40,8 +60,15 @@ class TodoListViewController: SwipeTableViewController {
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         if let cellItem = todoItems?[indexPath.row] {
             cell.textLabel!.text = cellItem.title
-            
             cell.accessoryType = cellItem.completed ? .checkmark : .none
+            
+            if let colour = todoItems?[indexPath.row].parentCategory.first!.backgroundColour! {
+                cell.backgroundColor = UIColor.init(hexString: colour)?.darken(byPercentage: CGFloat(indexPath.row) / CGFloat((todoItems?.count)!))
+                cell.textLabel?.textColor = ContrastColorOf(cell.backgroundColor!, returnFlat: true)
+                cell.accessoryView?.tintColor = ContrastColorOf(cell.backgroundColor!, returnFlat: true)
+                cell.accessoryView?.backgroundColor = ContrastColorOf(cell.backgroundColor!, returnFlat: true)
+            }
+            
         } else {
             cell.textLabel?.text = "No Items"
         }
@@ -99,6 +126,7 @@ class TodoListViewController: SwipeTableViewController {
         addItemAlert.addTextField { (alertTextField) in
             alertTextField.placeholder = "New todo"
             newTodoTextField = alertTextField
+            alertTextField.autocapitalizationType = UITextAutocapitalizationType.sentences
         }
         addItemAlert.addAction(alertAction)
         addItemAlert.addAction(cancelAlertAction)
