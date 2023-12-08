@@ -7,7 +7,7 @@ A simple iOS todo list app
 - Random colour generated for each category
 - Gradient colour in todo lists
 
-<img src="https://media.giphy.com/media/8K246rbMKLvjC2593J/giphy.gif" width="350">
+<img src="./Today.gif" alt="Today App Demo" height="600">
 
 <h4> Frameworks Used </h4>
 
